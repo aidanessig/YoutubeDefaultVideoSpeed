@@ -5,13 +5,24 @@ document.addEventListener("DOMContentLoaded", async () => {
   const status = document.getElementById("status");
   const clearStorageButton = document.getElementById("clearStorageButton");
 
+  speedSelector.disabled = true;
+  saveButton.disabled = true;
+  removeButton.disabled = true;
+  status.textContent = "This extension only works on YouTube videos.";
+
   // get the current video ID
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   const url = new URL(tab.url);
   const videoId = url.searchParams.get("v");
 
-  // check if the video is already saved
+  // ensue on youtube video
   if (videoId) {
+
+    // enable ui elements since it's a valid video page
+    speedSelector.disabled = false;
+    saveButton.disabled = false;
+    removeButton.disabled = false;
+
     chrome.storage.sync.get([videoId], (result) => {
       if (result[videoId]) {
         speedSelector.value = result[videoId]; // set dropdown to saved speed
@@ -21,11 +32,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         status.textContent = "No speed saved for this video.";
       }
     });
-  } else {
-    status.textContent = "Not on a valid video page.";
-    saveButton.disabled = true;
-    speedSelector.disabled = true;
-    removeButton.style.display = "none";
   }
 
   // save the selected speed
