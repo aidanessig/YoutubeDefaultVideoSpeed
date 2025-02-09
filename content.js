@@ -99,6 +99,7 @@
   function monitorNavigationAPI() {
 
     // if video visited directly, this is what is used, called only once
+    // otherwise, all logic is handled by the listener
     detectAutomaticPlay()
 
     // called when a video finishes loading
