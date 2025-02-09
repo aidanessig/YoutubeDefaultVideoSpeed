@@ -1,9 +1,13 @@
 {
     "manifest_version": 3,
-    "name": "Hello World Extension",
+    "name": "Youtube Default Video Speed",
     "version": "1.0",
-    "description": "A simple Chrome extension that shows 'Hello World' in a popup.",
-    "permissions": [],
+    "description": "A Chrome extension to set the default Youtube playback speed for specific, user selected videos.",
+    "permissions": ["storage", "scripting"],
+    "host_permissions": ["https://www.youtube.com/*"],
+    "background": {
+      "service_worker": "background.js"
+    },
     "action": {
       "default_popup": "popup.html",
       "default_icon": {
@@ -11,6 +15,13 @@
         "48": "icon.png",
         "128": "icon.png"
       }
+    },
+    "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
     }
+    ]
   }
   

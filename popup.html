@@ -3,13 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hello World</title>
-  <link rel="stylesheet" href="styles.css">
+  <title>YouTube Speed Manager</title>
 </head>
 <body>
-  <div id="content">
-    <h1>Hello World</h1>
-  </div>
+  <h1>YouTube Speed Manager</h1>
+
+  <label for="speedSelector">Select Speed:</label>
+  <select id="speedSelector">
+    <option value="0.25">0.25x</option>
+    <option value="0.5">0.5x</option>
+    <option value="0.75">0.75x</option>
+    <option value="Normal">Normal</option>
+    <option value="1.25">1.25x</option>
+    <option value="1.5">1.5x</option>
+    <option value="1.75">1.75x</option>
+    <option value="2">2.0x</option>
+  </select>
+
+  <button id="saveButton">Save</button>
+  <button id="removeButton" style="display: none;">Remove</button>
+  <button id="clearStorageButton" style="margin-top: 10px;">Clear All Data</button>
+
+  <p id="status"></p>
+
   <script src="popup.js"></script>
 </body>
 </html>
