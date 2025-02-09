@@ -1,3 +1,9 @@
+/* popup.js */
+
+/* javascript for the extension popup. handles adding to v tag to 
+   storage, sending messages to content script, and visibility
+   to the user for when they can interact with the html/popup */
+
 document.addEventListener("DOMContentLoaded", async () => {
   const speedSelector = document.getElementById("speedSelector");
   const saveButton = document.getElementById("saveButton");
