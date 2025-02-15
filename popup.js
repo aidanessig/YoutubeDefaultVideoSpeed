@@ -47,14 +47,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (videoId) 
       chrome.tabs.sendMessage(tab.id, { action: "getVideoDetails" }, (response) => {
         if (response) {
-          const { title, channel } = response;
+          const { title, channel, profileImage } = response;
 
           // store data
           const data = {
             [videoId]: {
               speed: selectedSpeed,
               title: title || "Unknown Title",
-              channel: channel || "Unknown Channel"
+              channel: channel || "Unknown Channel",
+              profileImage: profileImage || ""
             }
           };
 

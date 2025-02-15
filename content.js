@@ -120,8 +120,9 @@ function getVideoDetails() {
   const videoTitle = document.title.replace(" - YouTube", ""); // remove "- YouTube" that is appended
   const channelElement = document.querySelector("#owner #channel-name a"); // get the channel name
   const channelName = channelElement ? channelElement.textContent.trim() : "Unknown Channel";
+  const profileImage = document.querySelector('#owner yt-img-shadow img')?.src || "";
 
-  return { title: videoTitle, channel: channelName };
+  return { title: videoTitle, channel: channelName, profileImage: profileImage };
 }
 
 // handle messages from popup.js
