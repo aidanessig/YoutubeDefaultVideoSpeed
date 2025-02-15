@@ -31,8 +31,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     chrome.storage.sync.get([videoId], (result) => {
       if (result[videoId]) {
-        speedSelector.value = result[videoId]; // set dropdown to saved speed
-        status.textContent = `Saved speed: ${result[videoId]}x for this video.`;
+        const { speed, title, channel } = result[videoId]; 
+        speedSelector.value = speed; // set dropdown to saved speed
+        status.textContent = `Saved speed: ${speed}x for this video.`;
         removeButton.style.display = "inline-block"; // show remove button
       } else {
         status.textContent = "No speed saved for this video.";
@@ -43,15 +44,30 @@ document.addEventListener("DOMContentLoaded", async () => {
   // save the selected speed
   saveButton.addEventListener("click", () => {
     const selectedSpeed = speedSelector.value;
-    if (videoId) {
-      chrome.storage.sync.set({ [videoId]: selectedSpeed }, () => {
-        status.textContent = `Saved speed: ${selectedSpeed}x for this video.`;
-        removeButton.style.display = "inline-block";
+    if (videoId) 
+      chrome.tabs.sendMessage(tab.id, { action: "getVideoDetails" }, (response) => {
+        if (response) {
+          const { title, channel } = response;
 
-        // notify content.js to reapply speed immediately
-        chrome.tabs.sendMessage(tab.id, { action: "updateSpeed", speed: selectedSpeed });
-      });
-    }
+          // store data
+          const data = {
+            [videoId]: {
+              speed: selectedSpeed,
+              title: title || "Unknown Title",
+              channel: channel || "Unknown Channel"
+            }
+          };
+
+          // set the data to: extension storage -> sync
+          chrome.storage.sync.set(data, () => {
+            status.textContent = `Saved speed: ${selectedSpeed}x for this video.`;
+            removeButton.style.display = "inline-block";
+
+            // notify content.js to reapply speed immediately
+            chrome.tabs.sendMessage(tab.id, { action: "updateSpeed", speed: selectedSpeed });
+          });
+      }
+    });
   });
 
   // remove the saved speed

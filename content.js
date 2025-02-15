@@ -73,15 +73,16 @@ function detectAutomaticPlay() {
       const videoId = new URL(window.location.href).searchParams.get("v");
 
       chrome.storage.sync.get([videoId], (result) => {
-        const savedSpeed = result[videoId];
-        if (savedSpeed) {
-          openSettingsMenu(savedSpeed);
+        if (result[videoId]) {
+          const savedSpeed = result[videoId].speed; 
+          if (savedSpeed) {
+            openSettingsMenu(savedSpeed);
+          }
         }
       });
     }
   }
 }
-
 
 // main function to monitor page
 function monitorNavigationAPI() {
@@ -90,7 +91,8 @@ function monitorNavigationAPI() {
   // otherwise, all logic is handled by the listener
   detectAutomaticPlay()
 
-  // called when a video finishes loading
+  // called when a video finishes loading, so everytime 
+  // a video is visited for the  first time
   window.addEventListener("yt-navigate-finish", function () {
 
     const url = new URL(window.location.href);
@@ -100,22 +102,37 @@ function monitorNavigationAPI() {
 
       // check if this video ID exists in storage, i.e. the user wants it's speed changed
       chrome.storage.sync.get([videoId], (result) => {
-        const savedSpeed = result[videoId];
-        if (savedSpeed) {
+        if (result[videoId]) {
+          const savedSpeed = result[videoId].speed;
+          if (savedSpeed) {
 
             // matched video, start the sequence
             detectAutomaticPlay();
+          }
         }
     });
     }
   });
 }
 
+// extract video details (title and channel)
+function getVideoDetails() {
+  const videoTitle = document.title.replace(" - YouTube", ""); // remove "- YouTube" that is appended
+  const channelElement = document.querySelector("#owner #channel-name a"); // get the channel name
+  const channelName = channelElement ? channelElement.textContent.trim() : "Unknown Channel";
+
+  return { title: videoTitle, channel: channelName };
+}
+
 // handle messages from popup.js
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "getVideoDetails") {
+    sendResponse(getVideoDetails());
+  }
   if (message.action === "updateSpeed") {
     openSettingsMenu(message.speed);
-  } else if (message.action === "resetSpeed") {
+  } 
+  else if (message.action === "resetSpeed") {
     openSettingsMenu("Normal");
   }
 });
