@@ -24,12 +24,12 @@ More information on how to run chrome extensions locally can be found [here](htt
 
 Example with videos saved:
 
-![Example 1](https://i.postimg.cc/ZnYvSx8s/YDVS-3.png)
+<img src="https://i.postimg.cc/ZnYvSx8s/YDVS-3.png" alt="Example 1" width="400">
 
 Example of initial, empty view:
 
-![Example 2](https://i.postimg.cc/0j7WTxC0/YDVS-6.png)
+<img src="https://i.postimg.cc/0j7WTxC0/YDVS-6.png" alt="Example 2" width="400">
 
 Example of when not on video:
 
-![Example 3](https://i.postimg.cc/X7Gd7QMt/YDVS-5.png)
+<img src="https://i.postimg.cc/X7Gd7QMt/YDVS-5.png" alt="Example 3" width="400">
