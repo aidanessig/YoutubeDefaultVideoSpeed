@@ -1,11 +1,196 @@
+/* ---------- General Reset, Body, & Title ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 10px;
-    background-color: #f4f4f4;
-    text-align: center;
-  }
-  
-  #content h1 {
-    color: #333;
-  }
+  width: 300px;
+  font-family: 'Inter', sans-serif;
+  background-color: #262626; /* Dark Gray background */
+  color: #fff;
+}
+
+/* ---------- Top Red Section ---------- */
+.top-section {
+  background-color: #ff5858;
+  padding: 10px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+}
+.channel-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.channel-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  background-color: #414141;
+  overflow: hidden;
+  margin-right: 10px;
+}
+.channel-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.title-channel {
+  flex: 1;
+}
+.video-title {
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+.channel-name {
+  font-size: 12px;
+  color: #f0f0f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+.divider {
+  height: 2px;
+  background-color: #cccccc;
+  margin: 8px 0;
+}
+
+/* ---------- Speed Controls (Still in Red) ---------- */
+.speed-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0px;
+  font-size: 13px;
+}
+.speed-controls select {
+  flex: 1;
+  margin-right: 5px;
+  background-color: #414141;
+  color: white;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-weight: bold;
+  border: 1px solid #555;
+}
+.speed-controls button, .remove-all-btn {
+  background-color: #414141;
+  color: white;
+  font-weight: bold;
+  border: none;
+  margin: 0px 4px;
+  border-radius: 5px;
+  padding: 6px 6px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+.speed-controls select:hover,
+.speed-controls select:focus {
+  background-color: #5a5a5a;
+  outline: none;
+  border-color: white;
+}
+.speed-controls button:hover, .remove-all-btn:hover {
+  background-color: #5a5a5a; 
+  transform: scale(1.01);
+}
+.speed-controls select::-ms-expand {
+  display: none;
+}
+
+/* ---------- Middle Dark Section ---------- */
+.middle-section {
+  background-color: #262626;
+  padding: 10px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+}
+.saved-videos-container {
+  background-color: #414141;
+  border-radius: 5px;
+  padding: 8px;
+  max-height: 120px;
+  overflow-y: auto;
+  margin-bottom: 8px;
+}
+.video-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px solid #333;
+}
+.video-item:last-child {
+  border-bottom: none;
+}
+.video-title-saved {
+  max-width: 190px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 8px;
+}
+.video-speed-saved {
+  color: #ccc;
+  font-size: 12px;
+}
+.video-speed-saved a {
+  color: #fff;
+  text-decoration: none;
+}
+.video-speed-saved a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Bottom Section ---------- */
+.bottom-actions {
+  display: flex;
+  border-top: 2px solid #cccccc;
+  padding-top: 6px;
+  justify-content: space-between;
+  align-items: center;
+}
+.remove-all-btn {
+  background-color: #414141;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 8px;
+  cursor: pointer;
+  margin-bottom: 0px;
+  align-items: center;
+  justify-content: center;
+}
+.remove-all-btn:hover {
+  background-color: #5a5a5a;
+}
+#status {
+  margin-top: 2px;
+  font-size: 11px;
+  color: #f0f0f0;
+  min-height: 16px;
+  margin-left: 8px;
+}
+
+/* ---------- Scrollbar ---------- */
+.saved-videos-container::-webkit-scrollbar {
+  width: 8px; 
+}
+
+.saved-videos-container::-webkit-scrollbar-track {
+  background: #333; 
+  border-radius: 5px;
+}
+
+.saved-videos-container::-webkit-scrollbar-thumb {
+  background: #555; 
+  border-radius: 5px;
+}
+
+.saved-videos-container::-webkit-scrollbar-thumb:hover {
+  background: #777; 
+}

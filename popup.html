@@ -1,30 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YouTube Speed Manager</title>
+  <meta charset="UTF-8" />
+  <title>YouTube Default Video Speed</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-  <h1>YouTube Speed Manager</h1>
+  <!-- TOP SECTION (RED) -->
+  <div class="top-section">
+    <!-- Channel Info (icon + text) -->
+    <div class="channel-info">
+      <div class="channel-icon" id="channelIcon"></div>
+      <div class="title-channel">
+        <div class="video-title" id="videoTitle"></div>
+        <div class="channel-name" id="channelName"></div>
+      </div>
+    </div>
 
-  <label for="speedSelector">Select Speed:</label>
-  <select id="speedSelector">
-    <option value="0.25">0.25x</option>
-    <option value="0.5">0.5x</option>
-    <option value="0.75">0.75x</option>
-    <option value="Normal">Normal</option>
-    <option value="1.25">1.25x</option>
-    <option value="1.5">1.5x</option>
-    <option value="1.75">1.75x</option>
-    <option value="2">2.0x</option>
-  </select>
+    <div class="divider"></div>
 
-  <button id="saveButton">Save</button>
-  <button id="removeButton" style="display: none;">Remove</button>
-  <button id="clearStorageButton" style="margin-top: 10px;">Clear All Data</button>
+    <!-- Speed Controls -->
+    <div class="speed-controls">
+      <select id="speedSelector">
+        <option value="0.25">0.25x</option>
+        <option value="0.5">0.5x</option>
+        <option value="0.75">0.75x</option>
+        <option value="Normal">Normal</option>
+        <option value="1.25">1.25x</option>
+        <option value="1.5">1.5x</option>
+        <option value="1.75">1.75x</option>
+        <option value="2">2.0x</option>
+      </select>
+      <button id="saveButton">Save</button>
+      <button id="removeButton">Remove</button>
+    </div>
+  </div>
 
-  <p id="status"></p>
+  <!-- MIDDLE SECTION (Dark Gray) -->
+  <div class="middle-section">
+    <div class="saved-videos-container" id="savedVideosContainer"></div>
+
+    <!-- BOTTOM SECTION -->
+    <div class="bottom-actions">
+      <button id="clearStorageButton" class="remove-all-btn">Remove All Data</button>
+      <p id="status"></p>
+    </div>
+  </div>
 
   <script src="popup.js"></script>
 </body>
