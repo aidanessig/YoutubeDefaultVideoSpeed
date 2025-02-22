@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Youtube Default Video Speed",
     "version": "1.0",
-    "description": "A Chrome extension to set the default Youtube playback speed for specific, user selected videos.",
+    "description": "A Chrome extension to set the default Youtube playback speed for specific, user selected videos or channels.",
     "permissions": ["storage", "scripting", "activeTab"],
     "host_permissions": ["https://www.youtube.com/*"],
     "web_accessible_resources": [ {
