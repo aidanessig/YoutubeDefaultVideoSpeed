@@ -4,11 +4,11 @@
 
 ### How to Use:
 
-To use the extension, once on a Youtube video, click the extension icon. In the panel, you will see the option to select speed. Select the default speed that you want played each time the video is loaded and click 'Save'.
+To use the extension, once on a Youtube video, click the extension icon. In the panel, you will see the option to select speed. Select the default speed that you want each time the video is loaded and click 'Save'. If you want this speed to be applied to all videos of the current video's channels, click the check mark. 
 
-You will see the page change to reflect this new speed and this video added to the saved list. 
+You will see the page change to reflect this new speed and this video or channel added to the saved list. 
 
-When on a video that has a saved speed, this is shown in the bottom of the panel. This can be turned off with the 'Remove' button or can also clear all saved data with 'Remove All Data'.
+When on a video that has a saved speed, this is shown in the bottom of the panel. This save can be turned off with the 'Remove' button or can also clear all saved data with 'Remove All Data'.
 
 ### Running Locally
 
@@ -22,14 +22,14 @@ More information on how to run chrome extensions locally can be found [here](htt
 
 ### Gallery
 
-Example with videos saved:
+Example with videos and channels saved:
 
-<img src="https://i.postimg.cc/ZnYvSx8s/YDVS-3.png" alt="Example 1" width="400">
-
-Example of initial, empty view:
-
-<img src="https://i.postimg.cc/0j7WTxC0/YDVS-6.png" alt="Example 2" width="400">
+<img src="./gallery/IMG A 1280x800.png" alt="Example 1" width="400">
 
 Example of when not on video:
 
-<img src="https://i.postimg.cc/X7Gd7QMt/YDVS-5.png" alt="Example 3" width="400">
+<img src="./gallery/IMG B 1280x800.png" alt="Example 2" width="400">
+
+Example of initial, empty view:
+
+<img src="./gallery/IMG C 1280x800.png" alt="Example 3" width="400">
