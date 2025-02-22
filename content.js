@@ -71,53 +71,80 @@ function detectAutomaticPlay() {
     // is actively playing
     if (!videoElement.paused) {
       const videoId = new URL(window.location.href).searchParams.get("v");
+      const channelName = new URL(window.location.href).searchParams.get("ab_channel"); 
 
-      chrome.storage.sync.get([videoId], (result) => {
-        if (result[videoId]) {
-          const savedSpeed = result[videoId].speed; 
-          if (savedSpeed) {
-            openSettingsMenu(savedSpeed);
-          }
+      const channelStorageKey = `channel_${channelName}`;
+
+      chrome.storage.sync.get([videoId, channelStorageKey], (result) => {
+        let savedSpeed = result[videoId]?.speed; // first, check video speed
+        if (!savedSpeed) {
+          savedSpeed = result[channelStorageKey]?.speed; // if not found, check channel-wide speed
+        }
+  
+        if (savedSpeed) {
+          openSettingsMenu(savedSpeed);
         }
       });
     }
   }
 }
 
+let lastExecutionTime = 0;  // store the last execution time
+const EXECUTION_DELAY = 1000; // 1 second
+
 // main function to monitor page
 function monitorNavigationAPI() {
+  function safeDetectAutomaticPlay() {
+    // used for the case where a video is visited directly, but it is then, 
+    // is refreshed causing the function to be called twice
 
-  // if video visited directly, this is what is used, called only once
-  // otherwise, all logic is handled by the listener
-  detectAutomaticPlay()
+    const currentTime = Date.now();
+
+    // more than 1 second has passed, change speed
+    if (currentTime - lastExecutionTime > EXECUTION_DELAY) {
+      lastExecutionTime = currentTime; // update last execution timestamp
+      detectAutomaticPlay();
+    }
+  }
 
   // called when a video finishes loading, so everytime 
   // a video is visited for the  first time
+  safeDetectAutomaticPlay();
+
+  // event listener for youtube's navigation changes with retry logic
   window.addEventListener("yt-navigate-finish", function () {
 
-    const url = new URL(window.location.href);
-    const videoId = url.searchParams.get("v");
-
-    if (videoId) {
-
-      // check if this video ID exists in storage, i.e. the user wants it's speed changed
-      chrome.storage.sync.get([videoId], (result) => {
-        if (result[videoId]) {
-          const savedSpeed = result[videoId].speed;
-          if (savedSpeed) {
-
-            // matched video, start the sequence
-            detectAutomaticPlay();
-          }
-        }
-    });
+    // ensure on a YouTube video page, not a channel page
+    if (!window.location.href.includes("watch?v=")) {
+      return;
     }
+
+    // start an interval that checks every 0.5s
+    const intervalId = setInterval(() => {
+      const videoElement = document.querySelector("video");
+      const settingsButton = document.querySelector(".ytp-settings-button");
+
+      // once the video is ready, clear the interval and proceed, this videoElement.readyState
+      // is the part that makes it wait longer and what we are waiting on
+      if (videoElement && settingsButton && videoElement.readyState >= 2) {
+        // clear interval since we are making changes
+        clearInterval(intervalId);
+
+        // delay while page continues to load
+        setTimeout(() => {
+          safeDetectAutomaticPlay();
+        }, 500);
+      }
+      // NOTE: in theory, this could run infinitely, however, a video should eventually load, 
+      // so have not added an end limit. maybe in the future...
+    }, 500);
   });
 }
 
 // extract video details (title and channel)
 function getVideoDetails() {
-  const videoTitle = document.title.replace(" - YouTube", ""); // remove "- YouTube" that is appended
+  const titleElement = document.querySelector("#title h1 yt-formatted-string");
+  const videoTitle = titleElement ? titleElement.textContent.trim() : "Unknown Title";
   const channelElement = document.querySelector("#owner #channel-name a"); // get the channel name
   const channelName = channelElement ? channelElement.textContent.trim() : "Unknown Channel";
   const profileImage = document.querySelector('#owner yt-img-shadow img')?.src || "";

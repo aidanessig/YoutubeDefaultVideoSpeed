@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const removeButton = document.getElementById("removeButton");
   const status = document.getElementById("status");
   const clearStorageButton = document.getElementById("clearStorageButton");
+  const channelSaveCheckbox = document.getElementById("channelSaveCheckbox");
 
   // elements for top section
   const channelIcon = document.getElementById("channelIcon");
@@ -17,6 +18,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const channelNameEl = document.getElementById("channelName");
   const savedVideosContainer = document.getElementById("savedVideosContainer");
 
+  // default ui values
   speedSelector.disabled = true;
   saveButton.disabled = true;
   removeButton.disabled = true;
@@ -28,41 +30,73 @@ document.addEventListener("DOMContentLoaded", async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   const url = new URL(tab.url);
   const videoId = url.searchParams.get("v");
+  const channelName = url.searchParams.get("ab_channel");
+  const channelStorageKey = channelName ? `channel_${channelName}` : null;
+
+  function updateSavedElementUI(speed, title, channel, profileImage, isChannel = false) {
+    // used to update the popup based on video elements
+
+    speedSelector.value = speed;
+    const speedText = (speed === "Normal") ? "Normal" : `${speed}x`;
+
+    status.textContent = isChannel
+    ? `Saved speed: ${speedText}`
+    : `Saved speed: ${speedText}`;
+
+    removeButton.style.display = "inline-block";
+
+    // display the channel icon and text
+    videoTitleEl.textContent = title || "Unknown Title";
+    channelNameEl.textContent = channel || "Unknown Channel";
+    if (profileImage) {
+      channelIcon.innerHTML = `<img src="${profileImage}" alt="Channel Icon" />`;
+    }
+
+    channelSaveCheckbox.checked = isChannel;
+  }
 
   // ensure on youtube video
-  if (videoId) {
+  if (videoId || channelStorageKey) {
 
     // enable ui elements since it's a valid video page
     speedSelector.disabled = false;
     saveButton.disabled = false;
     removeButton.disabled = false;
 
-    chrome.storage.sync.get([videoId], (result) => {
-      if (result[videoId]) {
-        const { speed, title, channel, profileImage } = result[videoId]; 
-        speedSelector.value = speed;
-        const speedText = (speed === "Normal") ? "Normal" : `${speed}x`;
-        status.textContent = `Saved speed: ${speedText}.`;
-        removeButton.style.display = "inline-block"; // show remove button
+    // get the details of the current video
+    chrome.tabs.sendMessage(tab.id, { action: "getVideoDetails" }, (response) => {
 
-        // display the channel icon and text
-        videoTitleEl.textContent = title || "Unknown Title";
-        channelNameEl.textContent = channel || "Unknown Channel";
-        if (profileImage) {
-          channelIcon.innerHTML = `<img src="${profileImage}" alt="Channel Icon" />`;
-        }
-      } else {
-        status.textContent = "No speed saved.";
-        chrome.tabs.sendMessage(tab.id, { action: "getVideoDetails" }, (response) => {
-          if (response) {
-            videoTitleEl.textContent = response.title || "Unknown Title";
-            channelNameEl.textContent = response.channel || "Unknown Channel";
-            if (response.profileImage) {
-              channelIcon.innerHTML = `<img src="${response.profileImage}" alt="Channel Icon" />`;
-            }
+      // save the actual video info on the current page
+      const videoTitle = response.title;
+      const videoChannelName = response.channel;
+      const videoProfileImage = response.profileImage;
+
+      // check storage for the saved channel or video
+      chrome.storage.sync.get([videoId, channelStorageKey], (result) => {
+        let videoSaved = result[videoId] ? true : false;
+        let channelSaved = result[channelStorageKey] ? true : false;
+        
+        // determine if we are on a saved video or channel
+        if (videoSaved || channelSaved) {
+          if (channelSaved) {
+            const { speed, channel, profileImage } = result[channelStorageKey]; 
+            const title = videoTitle;  
+            updateSavedElementUI(speed, title, channel, profileImage, true);
+          } 
+          if (videoSaved) {
+            const { speed, title, channel, profileImage } = result[videoId]; 
+            updateSavedElementUI(speed, title, channel, profileImage, false); 
           }
-        });
-      }
+        } else {
+          // default when not on a saved video/channel
+          status.textContent = "No speed saved.";
+          videoTitleEl.textContent = videoTitle || "Unknown Title";
+          channelNameEl.textContent = videoChannelName || "Unknown Channel";
+          if (videoProfileImage) {
+            channelIcon.innerHTML = `<img src="${videoProfileImage}" alt="Channel Icon" />`;
+          }
+        }
+      });
     });
   } 
   // default for when not on video
@@ -82,21 +116,35 @@ document.addEventListener("DOMContentLoaded", async () => {
       chrome.tabs.sendMessage(tab.id, { action: "getVideoDetails" }, (response) => {
         if (response) {
           const { title, channel, profileImage } = response;
+          let data = {};
 
-          // store data
-          const data = {
-            [videoId]: {
-              speed: selectedSpeed,
-              title: title || "Unknown Title",
-              channel: channel || "Unknown Channel",
-              profileImage: profileImage || ""
-            }
-          };
+          if (channelSaveCheckbox.checked && channelName) {
+            // save speed for the entire channel
+            data = {
+              [`channel_${channelName}`]: {
+                speed: selectedSpeed,
+                channel: channel || "Unknown Channel",
+                profileImage: profileImage || ""
+              }
+            };
+          } else {
+            // save speed for the specific video
+            data = {
+              [videoId]: {
+                speed: selectedSpeed,
+                title: title || "Unknown Title",
+                channel: channel || "Unknown Channel",
+                profileImage: profileImage || ""
+              }
+            };
+          }
 
           // set the data to: extension storage -> sync
           chrome.storage.sync.set(data, () => {
-            const speedText = (selectedSpeed === "Normal") ? "Normal" : `${selectedSpeed}x`;
-            status.textContent = `Saved speed: ${speedText}.`;
+            const speedText = selectedSpeed === "Normal" ? "Normal" : `${selectedSpeed}x`;
+            status.textContent = channelSaveCheckbox.checked
+              ? `Saved speed: ${speedText}`
+              : `Saved speed: ${speedText}`;
 
             removeButton.style.display = "inline-block"; // show remove button
 
@@ -120,18 +168,35 @@ document.addEventListener("DOMContentLoaded", async () => {
   // remove the saved speed
   removeButton.addEventListener("click", () => {
     if (videoId) {
-      chrome.storage.sync.remove(videoId, () => {
-        status.textContent = "Video no longer saved.";
-        removeButton.style.display = "none";
 
-        // reset the top section for the current video
-        speedSelector.value = "Normal";
+      chrome.storage.sync.get([videoId, channelStorageKey], (result) => {
+        const hasVideoSaved = result[videoId] !== undefined;
+        const hasChannelSaved = result[channelStorageKey] !== undefined;
+  
+        if (hasVideoSaved) {
+          // remove only the video speed
+          chrome.storage.sync.remove(videoId, () => {
+            status.textContent = "Video speed removed.";
+            removeButton.style.display = hasChannelSaved ? "inline-block" : "none"; // hide only if channel speed isn't saved
+            speedSelector.value = "Normal";
+            chrome.tabs.sendMessage(tab.id, { action: "resetSpeed" });
+  
+            // refresh saved list
+            displayAllSavedVideos();
+          });
+        } else if (hasChannelSaved) {
+          // remove only the channel speed
+          chrome.storage.sync.remove(channelStorageKey, () => {
+            status.textContent = "Channel speed removed.";
+            removeButton.style.display = "none";
+            speedSelector.value = "Normal";
 
-        // notify content.js to reset to default speed
-        chrome.tabs.sendMessage(tab.id, { action: "resetSpeed" });
-
-        // refresh the full list of saved videos
-        displayAllSavedVideos();
+            chrome.tabs.sendMessage(tab.id, { action: "resetSpeed" });
+  
+            // refresh saved list
+            displayAllSavedVideos();
+          });
+        }
       });
     }
   });
@@ -153,16 +218,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     chrome.storage.sync.get(null, (items) => {
       savedVideosContainer.innerHTML = ""; // clear old entries
 
-      const allVideoIds = Object.keys(items);
-      if (allVideoIds.length === 0) {
+      const allVideoIdsAndChannels = Object.keys(items);
+      if (allVideoIdsAndChannels.length === 0) {
         // nothing saved
         savedVideosContainer.innerHTML = "<p style='color:#ccc;font-size:12px;'>Saved videos appear here.</p>";
         return;
       }
 
-      allVideoIds.forEach((id) => {
-        const data = items[id];
-        const { speed, title } = data;
+      allVideoIdsAndChannels.forEach((key) => {
+        const data = items[key];
+        const { speed, title, channel } = data;
+
+        // determine if this is a video-specific entry or a channel-wide entry
+        const isChannelWide = key.startsWith("channel_");
+        const displayName = isChannelWide ? channel : title;
+        const linkId = isChannelWide ? `https://www.youtube.com/${channel}` : `https://www.youtube.com/watch?v=${key}`;
 
         // create a row-like div
         const videoItem = document.createElement("div");
@@ -171,12 +241,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         // title & speed
         const titleSpan = document.createElement("span");
         titleSpan.classList.add("video-title-saved");
-        titleSpan.textContent = title || "Unknown Title";
-        titleSpan.title = title || "Unknown Title";
+
+        // if a channel-wide speed, italicize the title
+        if (isChannelWide) {
+          titleSpan.innerHTML = `<em>${displayName || "Unknown Channel"}</em>`;
+        } else {
+          titleSpan.textContent = displayName || "Unknown Title";
+        }
+
+        titleSpan.title = displayName || "Unknown Title";
 
         const speedSpan = document.createElement("span");
         speedSpan.classList.add("video-speed-saved");
-        speedSpan.innerHTML = `<a href="https://www.youtube.com/watch?v=${id}" target="_blank">
+        speedSpan.innerHTML = `<a href="${linkId}" target="_blank">
         ${(speed === "Normal") ? "Normal" : speed + "x"} </a>`;
 
         videoItem.appendChild(titleSpan);
