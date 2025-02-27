@@ -2,6 +2,8 @@
 
 ## Google Chrome Extension to Set a Default Youtube Video Speed
 
+Now available on the Chrome Web Store! Download from the listing page [here](https://chromewebstore.google.com/detail/hjeoljpoeejbcphgkdekeaoddggoekhp?utm_source=item-share-cp)!
+
 ### How to Use:
 
 To use the extension, once on a Youtube video, click the extension icon. In the panel, you will see the option to select speed. Select the default speed that you want each time the video is loaded and click 'Save'. If you want this speed to be applied to all videos of the current video's channels, click the check mark. 
