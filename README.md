@@ -2,7 +2,7 @@
 
 ## Google Chrome Extension to Set a Default Youtube Video Speed
 
-Now available on the Chrome Web Store! Download from the listing page [here](https://chromewebstore.google.com/detail/hjeoljpoeejbcphgkdekeaoddggoekhp?utm_source=item-share-cp)!
+Now available on the Chrome Web Store! Download from the listing page [here](https://chromewebstore.google.com/detail/hjeoljpoeejbcphgkdekeaoddggoekhp?utm_source=item-share-cp).
 
 ### How to Use:
 
