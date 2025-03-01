@@ -4,6 +4,11 @@
     "version": "1.0",
     "description": "A Chrome extension to set the default Youtube playback speed for specific, user selected videos or channels.",
     "permissions": ["storage", "activeTab"],
+    "icons": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    },
     "host_permissions": ["https://www.youtube.com/*"],
     "web_accessible_resources": [ {
       "resources": ["images/*"],
