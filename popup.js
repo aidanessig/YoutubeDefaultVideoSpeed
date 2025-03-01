@@ -30,7 +30,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   const url = new URL(tab.url);
   const videoId = url.searchParams.get("v");
-  const channelName = url.searchParams.get("ab_channel");
+  const channelElement = document.querySelector("#owner #channel-name a"); // get the channel name
+  const channelName = channelElement ? channelElement.textContent.trim() : null;
   const channelStorageKey = channelName ? `channel_${channelName}` : null;
 
   function updateSavedElementUI(speed, title, channel, profileImage, isChannel = false) {
@@ -66,10 +67,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     // get the details of the current video
     chrome.tabs.sendMessage(tab.id, { action: "getVideoDetails" }, (response) => {
 
+      if (!response || response.isAd) {
+        // if ad is playing or response is invalid
+        status.textContent = "Ad playing. Please wait.";
+        speedSelector.disabled = true;
+        saveButton.disabled = true;
+        removeButton.disabled = true;
+        return;
+      }
+
       // save the actual video info on the current page
       const videoTitle = response.title;
       const videoChannelName = response.channel;
       const videoProfileImage = response.profileImage;
+
+      const channelStorageKey = videoChannelName ? `channel_${videoChannelName.replace(/\s/g, '')}` : null;
 
       // check storage for the saved channel or video
       chrome.storage.sync.get([videoId, channelStorageKey], (result) => {
@@ -118,10 +130,10 @@ document.addEventListener("DOMContentLoaded", async () => {
           const { title, channel, profileImage } = response;
           let data = {};
 
-          if (channelSaveCheckbox.checked && channelName) {
+          if (channelSaveCheckbox.checked) {
             // save speed for the entire channel
             data = {
-              [`channel_${channelName}`]: {
+              [`channel_${channel.replace(/\s/g, '')}`]: {
                 speed: selectedSpeed,
                 channel: channel || "Unknown Channel",
                 profileImage: profileImage || ""
@@ -167,7 +179,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // remove the saved speed
   removeButton.addEventListener("click", () => {
-    if (videoId) {
+    chrome.tabs.sendMessage(tab.id, { action: "getVideoDetails" }, (response) => {
+      if (!response || response.isAd) {
+        // prevent removing speed if an ad is playing or no valid video details are found
+        status.textContent = "Ad playing or no valid video detected. Cannot remove speed.";
+        return;
+      }
+  
+      const videoId = new URL(tab.url).searchParams.get("v");
+      const videoChannelName = response.channel;
+      const channelStorageKey = videoChannelName ? `channel_${videoChannelName.replace(/\s/g, '')}` : null;
 
       chrome.storage.sync.get([videoId, channelStorageKey], (result) => {
         const hasVideoSaved = result[videoId] !== undefined;
@@ -198,7 +219,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           });
         }
       });
-    }
+   });
   });
 
   // clear all stored data

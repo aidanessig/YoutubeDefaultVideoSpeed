@@ -70,10 +70,15 @@ function detectAutomaticPlay() {
 
     // is actively playing
     if (!videoElement.paused) {
-      const videoId = new URL(window.location.href).searchParams.get("v");
-      const channelName = new URL(window.location.href).searchParams.get("ab_channel"); 
+      const videoDetails = getVideoDetails();
 
-      const channelStorageKey = `channel_${channelName}`;
+      if (videoDetails.isAd) {
+        return;
+      }
+  
+      const videoId = new URL(window.location.href).searchParams.get("v");
+      const videoChannelName = videoDetails.channel;
+      const channelStorageKey = videoChannelName ? `channel_${videoChannelName.replace(/\s/g, '')}` : null;
 
       chrome.storage.sync.get([videoId, channelStorageKey], (result) => {
         let savedSpeed = result[videoId]?.speed; // first, check video speed
@@ -103,7 +108,13 @@ function monitorNavigationAPI() {
     // more than 1 second has passed, change speed
     if (currentTime - lastExecutionTime > EXECUTION_DELAY) {
       lastExecutionTime = currentTime; // update last execution timestamp
-      detectAutomaticPlay();
+
+      // check if an ad is playing
+      if (isAdPlaying()) {
+          watchForAdToEnd(); // wait until the ad finishes
+      } else {
+        detectAutomaticPlay(); // proceed with playback speed change
+      }
     }
   }
 
@@ -141,8 +152,46 @@ function monitorNavigationAPI() {
   });
 }
 
+function watchForAdToEnd() {
+  const player = document.querySelector(".html5-video-player");
+  if (!player) return;
+
+  // create an observer
+  const observer = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      // only care if class changed
+      if (mutation.attributeName === "class") {
+        // check if the "ad-showing" class is gone
+        if (!player.classList.contains("ad-showing")) {
+          console.log("Ad finished, applying speed.");
+          // disconnect so we don't keep watching forever
+          observer.disconnect();
+          // now that ad is over, fire the event listened to by the main listener
+          window.dispatchEvent(new Event("yt-navigate-finish"));
+        }
+      }
+    }
+  });
+
+  // observe changes to the 'class' attribute on the player
+  observer.observe(player, {
+    attributes: true,
+    attributeFilter: ["class"]
+  });
+}
+
+// check if an ad is currently playing
+function isAdPlaying() {
+  const player = document.querySelector(".html5-video-player");
+  return player && player.classList.contains("ad-showing");
+}
+
 // extract video details (title and channel)
 function getVideoDetails() {
+  if (isAdPlaying()) {
+    return { isAd: true }; // indicate an ad is playing
+  }
+
   const titleElement = document.querySelector("#title h1 yt-formatted-string");
   const videoTitle = titleElement ? titleElement.textContent.trim() : "Unknown Title";
   const channelElement = document.querySelector("#owner #channel-name a"); // get the channel name
